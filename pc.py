@@ -1,6 +1,7 @@
 from inspect import Attribute
 from multiprocessing.connection import Client
 import json
+from queue import PriorityQueue
 from urllib.request import Request
 import requests
 import sqlite3
@@ -13,23 +14,31 @@ connectionCursor = conn.cursor()
 # url = "https://api.planningcenteronline.com/services/v2"
 
 def getNextLinkFromDB():
-    
     for row in connectionCursor.execute("SELECT NextPlan_Link FROM PlanningCenterPlan ORDER BY UpdatedDate DESC LIMIT 1"):
         nextPlanLink = row[0]
-
-def checkNextPlanLinkResults(result):
-    if result == None:
-        pprint('No new PlanningCenter Plans. Please try again later.')
-    else:
-        return result
+        return nextPlanLink
 
 def sendRequest(pcRequest):
     response = requests.get(pcRequest, auth=(credentials.username, credentials.secret))
     data = response.json()['data']
-    pprint(response.json()['data'])
+    return (data['links']['next_plan'], data)
+
+def checkNextPlanLinkResults(result):
+    if result == None:
+        for row in connectionCursor.execute("SELECT Self_Link FROM PlanningCenterPlan ORDER BY UpdatedDate DESC LIMIT 1"):
+            if row[0] == None:
+                return "None" #update record
+            else: 
+                return "Data!" #update record
+            #nextPlan = sendRequest(row)[0]
+            #return nextPlan[0]
+    else:
+        return result
 
 def writeRequestToDB(data):
-    c.execute("insert into PlanningCenterPlan values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
+    conn.execute("insert into PlanningCenterPlan values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
     (data['attributes']['created_at'], data['attributes']['dates'], data['attributes']['items_count'], data['attributes']['series_title'], data['attributes']['title'],data['attributes']['total_length'],data['attributes']['updated_at'],data['links']['my_schedules'],data['links']['notes'],data['links']['previous_plan'],data['links']['self'],data['links']['next_plan'],data['id']))
     conn.commit()
     
+link = (getNextLinkFromDB())
+pprint(checkNextPlanLinkResults(link))
