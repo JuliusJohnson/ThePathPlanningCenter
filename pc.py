@@ -21,19 +21,15 @@ def getNextLinkFromDB():
 def sendRequest(pcRequest):
     response = requests.get(pcRequest, auth=(credentials.username, credentials.secret))
     data = response.json()['data']
-    return (data['links']['next_plan'], data)
+    return (data)
 
 def checkNextPlanLinkResults(result):
     if result == None:
         for row in connectionCursor.execute("SELECT Self_Link FROM PlanningCenterPlan ORDER BY UpdatedDate DESC LIMIT 1"):
-            if row[0] == None:
-                return "None" #update record
-            else: 
-                return "Data!" #update record
-            #nextPlan = sendRequest(row)[0]
-            #return nextPlan[0]
-    else:
-        return result
+            if sendRequest(row[0]) == "None":
+                return "None"
+            else:
+                return(f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/{sendRequest(row[0])['id']}/next_plan")
 
 def writeRequestToDB(data):
     conn.execute("insert into PlanningCenterPlan values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
@@ -41,4 +37,5 @@ def writeRequestToDB(data):
     conn.commit()
     
 link = (getNextLinkFromDB())
-pprint(checkNextPlanLinkResults(link))
+update = checkNextPlanLinkResults(link)
+pprint(update)
