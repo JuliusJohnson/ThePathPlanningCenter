@@ -26,7 +26,7 @@ def sendRequest(pcRequest):
 def checkNextPlanLinkResults(result):
     if result == None:
         for row in connectionCursor.execute("SELECT Self_Link FROM PlanningCenterPlan ORDER BY UpdatedDate DESC LIMIT 1"):
-            if sendRequest(row[0]) == "None":
+            if sendRequest(row[0])['links']['next_plan'] == None:
                 return "None"
             else:
                 return(f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/{sendRequest(row[0])['id']}/next_plan")
@@ -35,7 +35,9 @@ def writeRequestToDB(data):
     conn.execute("insert into PlanningCenterPlan values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
     (data['attributes']['created_at'], data['attributes']['dates'], data['attributes']['items_count'], data['attributes']['series_title'], data['attributes']['title'],data['attributes']['total_length'],data['attributes']['updated_at'],data['links']['my_schedules'],data['links']['notes'],data['links']['previous_plan'],data['links']['self'],data['links']['next_plan'],data['id']))
     conn.commit()
+    pprint("Update Successful")
     
 link = (getNextLinkFromDB())
 update = checkNextPlanLinkResults(link)
-pprint(update)
+if update != "None":
+    writeRequestToDB(sendRequest(update))
