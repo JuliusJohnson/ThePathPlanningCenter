@@ -10,8 +10,6 @@ from config import credentials
 
 conn = sqlite3.connect('/home/julius/Documents/python/projects/thepath/PlanningCenter')
 connectionCursor = conn.cursor()
-# grant_type = 'client_credentials'
-# url = "https://api.planningcenteronline.com/services/v2"
 
 def getNextLinkFromDB():
     for row in connectionCursor.execute("SELECT NextPlan_Link FROM PlanningCenterPlan ORDER BY UpdatedDate DESC LIMIT 1"):
