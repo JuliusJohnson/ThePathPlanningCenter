@@ -6,7 +6,7 @@ from urllib.request import Request
 import requests
 import sqlite3
 from pprint import pprint
-from config import credentials
+import sendRequest
 
 conn = sqlite3.connect('/home/julius/Documents/python/projects/thepath/PlanningCenter')
 connectionCursor = conn.cursor()
@@ -16,18 +16,13 @@ def getNextLinkFromDB():
         nextPlanLink = row[0]
         return nextPlanLink
 
-def sendRequest(pcRequest):
-    response = requests.get(pcRequest, auth=(credentials.username, credentials.secret))
-    data = response.json()['data']
-    return (data)
-
 def checkNextPlanLinkResults(result):
     if result == None:
         for row in connectionCursor.execute("SELECT Self_Link FROM PlanningCenterPlan ORDER BY UpdatedDate DESC LIMIT 1"):
-            if sendRequest(row[0])['links']['next_plan'] == None:
+            if sendRequest.sendRequest(row[0])['links']['next_plan'] == None:
                 return "None"
             else:
-                return(f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/{sendRequest(row[0])['id']}/next_plan")
+                return(f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/{sendRequest.sendRequest(row[0])['id']}/next_plan")
 
 def writeRequestToDB(data):
     conn.execute("insert into PlanningCenterPlan values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)",
@@ -38,4 +33,4 @@ def writeRequestToDB(data):
 link = (getNextLinkFromDB())
 update = checkNextPlanLinkResults(link)
 if update != "None":
-    writeRequestToDB(sendRequest(update))
+    writeRequestToDB(sendRequest.sendRequest(update))

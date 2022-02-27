@@ -2,6 +2,7 @@ import json
 from urllib.request import Request
 import requests
 import sqlite3
+import sendRequest
 from pprint import pprint
 from config import credentials
 
@@ -13,4 +14,6 @@ def getSelfLinkFromDB():
         nextPlanLink = row[0]
         return str(nextPlanLink) + "/items"
 
-print(getSelfLinkFromDB())
+
+x = getSelfLinkFromDB()
+pprint(sendRequest.sendRequest(x))
