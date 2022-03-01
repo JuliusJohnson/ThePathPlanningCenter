@@ -22,6 +22,7 @@ def writeRequestToDB(data):
     conn.commit()
     pprint("Update Successful")
 
-x = getSelfLinkFromDB()
-y = (sendRequest.sendRequest(x)[0])
-writeRequestToDB(y)
+def updatePlanItems():
+    currentPlanItems = sendRequest.sendRequest(getSelfLinkFromDB())
+    for attribute in currentPlanItems:
+        writeRequestToDB(attribute)
