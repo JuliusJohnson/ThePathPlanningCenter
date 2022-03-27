@@ -8,7 +8,7 @@ from pprint import pprint
 from config import credentials
 from datetime import date
 
-conn = sqlite3.connect('/home/julius/Documents/python/projects/thepath/PlanningCenter')
+conn = sqlite3.connect('/home/julius/Documents/python/projects/thepathDB/PlanningCenter')
 connectionCursor = conn.cursor()
 
 def getSelfLinkFromDB():
