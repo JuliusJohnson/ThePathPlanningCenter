@@ -24,10 +24,19 @@ def checkNextPlanLinkResults(result):
             connectionCursor.execute(updateQuery, params)
             conn.commit()
     return 
+
+# def updateSelfLink(result):
+#     for row in connectionCursor.execute("SELECT Self_Link FROM PlanningCenterPlan ORDER BY PlanningCenterPlan.ID DESC LIMIT 1"):
+#         if sendRequest.sendRequest(row[0])['links']['next_plan'] != None:
+#             updateQuery = "UPDATE PlanningCenterPlan SET Self_Link = ? WHERE ID = ?"
+#             params = (f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/{sendRequest.sendRequest(row[0])['id']}",sendRequest.sendRequest(row[0])['id'])
+#             connectionCursor.execute(updateQuery, params)
+#             conn.commit()
+#     return 
     
 def writeRequestToDB(data):
     conn.execute("insert into PlanningCenterPlan values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    (data['attributes']['created_at'], data['attributes']['dates'], data['attributes']['items_count'], data['attributes']['series_title'], data['attributes']['title'],data['attributes']['total_length'],data['attributes']['updated_at'],data['links']['my_schedules'],data['links']['notes'],data['links']['previous_plan'],data['links']['self'],data['links']['next_plan'],data['id'],datetime.now()))
+    (data['attributes']['created_at'], data['attributes']['dates'], data['attributes']['items_count'], data['attributes']['series_title'], data['attributes']['title'],data['attributes']['total_length'],data['attributes']['updated_at'],data['links']['my_schedules'],data['links']['notes'],data['links']['previous_plan'],f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/" + data['id'],data['links']['next_plan'],data['id'],datetime.now()))
     conn.commit()
     pprint("Update Successful")
 
