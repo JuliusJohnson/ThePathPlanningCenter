@@ -11,7 +11,7 @@ conn = sqlite3.connect('/home/julius/Documents/python/projects/thepathDB/Plannin
 connectionCursor = conn.cursor()
 
 def getNextLinkFromDB():
-    for row in connectionCursor.execute("SELECT NextPlan_Link FROM PlanningCenterPlan ORDER BY PlanningCenterPlan.ID DESC LIMIT 1"):
+    for row in connectionCursor.execute(r"SELECT Self_Link ||'/next_plan' FROM PlanningCenterPlan ORDER BY PlanningCenterPlan.ID DESC LIMIT 1"):
         nextPlanLink = row[0]
         print(nextPlanLink)
         return nextPlanLink
@@ -35,19 +35,25 @@ def checkNextPlanLinkResults(result):
 #     return 
     
 def writeRequestToDB(data):
+    link = f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/"
     conn.execute("insert into PlanningCenterPlan values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    (data['attributes']['created_at'], data['attributes']['dates'], data['attributes']['items_count'], data['attributes']['series_title'], data['attributes']['title'],data['attributes']['total_length'],data['attributes']['updated_at'],data['links']['my_schedules'],data['links']['notes'],data['links']['previous_plan'],f"https://api.planningcenteronline.com/services/v2/service_types/848341/plans/" + data['id'],data['links']['next_plan'],data['id'],datetime.now()))
+    (data['attributes']['created_at'], data['attributes']['dates'], data['attributes']['items_count'], data['attributes']['series_title'], data['attributes']['title'],data['attributes']['total_length'],data['attributes']['updated_at'],link + data['id'] + "/my_schedules",link + data['id'] + "/notes", link + data['id'] + "/previous_plan", link+ data['id'],data['links']['next_plan'],data['id'],datetime.now()))
     conn.commit()
     pprint("Update Successful")
 
 def main():
-
-    link = (getNextLinkFromDB())
-    pprint(link)
-    update = checkNextPlanLinkResults(link)
-    pprint(update)
-    writeRequestToDB(sendRequest.sendRequest(link))
-    updateplanitems.updatePlanItems()
+    errid = False 
+    while errid == False:
+        try:
+            link = (getNextLinkFromDB())
+            pprint(link)
+            update = checkNextPlanLinkResults(link)
+            pprint(update)
+            writeRequestToDB(sendRequest.sendRequest(link))
+            updateplanitems.updatePlanItems()
+        except:
+            errid = True
+            print("Error Found") 
 
 if __name__=="__main__":
     main()
